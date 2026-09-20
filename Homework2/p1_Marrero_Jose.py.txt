@@ -1,0 +1,99 @@
+1. # Name: Jose Marrero
+2. # Z Number = Z23816617
+3. 
+4. 
+5. # Step A
+6. 
+7. def line_number(in_file: str, out_file: str):
+8.     """
+9.     The function reads the first file and saves a copy in the
+10.     second file, adding a number at the beginning of each line.
+11.     """
+12.     try:
+13.         input_file = open(in_file, 'r')
+14.         output_file = open(out_file, 'w')
+15. 
+16.         line_count_int = 1
+17.         for line_str in input_file:
+18.             output_file.write(f"{line_count_int}. {line_str}")
+19.             line_count_int += 1
+20. 
+21.         input_file.close()
+22.         output_file.close()
+23. 
+24.     except FileNotFoundError:
+25.         print("The input file does not exist.")
+26.         raise
+27. 
+28. 
+29. # Step B
+30. 
+31. def parse_functions(filename: str):
+32.     """The function takes a Python filename and reads it to find the functions defined inside.
+33.     It returns a tuple of tuples, each containing the function’s starting line number,
+34.     name, parameter list as text, and full code as text with empty lines and comments removed.
+35.     """
+36.     try:
+37.         with open(filename, 'r') as input_file:
+38.             lines = input_file.readlines()
+39.     except FileNotFoundError:
+40.         print("The input file does not exist.")
+41.         raise
+42. 
+43.     parsed_f = []
+44.     i = 0
+45.     total = len(lines)
+46. 
+47.     while i < total:
+48.         line = lines[i]
+49.         stripped = line.strip()
+50. 
+51.         if stripped.startswith("def ") and "(" in stripped and ":" in stripped:
+52.             start = i + 1
+53.             indent = len(line) - len(line.lstrip())
+54. 
+55.             def_pos = line.find("def ")
+56.             paren_start = line.find("(", def_pos)
+57.             paren_end = line.rfind(")")
+58. 
+59.             f_name = line[def_pos +4:paren_start].strip()
+60.             params = line[paren_start +1:paren_end].strip()
+61. 
+62.             code_ls = []
+63.             j = i 
+64.             while j < total:
+65.                 current_line = lines[j]
+66.                 current_stripped = current_line.strip()
+67. 
+68.                 if j > i and current_stripped:
+69.                     current_indent = len(current_line) - len(current_line.lstrip())
+70.                     if current_indent <= indent:
+71.                         break 
+72. 
+73.                 if current_stripped and not current_stripped.startswith("#"):
+74.                     code_ls.append(current_line.rstrip())
+75. 
+76.                 j += 1
+77. 
+78.             final_code = "\n".join(code_ls)
+79.             parsed_f.append((start, f_name, params, final_code))
+80.             i = j - 1
+81. 
+82.         i += 1 
+83.     parsed_f.sort(key=lambda item: item[1])
+84.     return tuple(parsed_f)
+85. 
+86. def main():
+87.     in_str = "p1_Marrero_Jose.py"
+88.     out_str = "p1_Marrero_Jose.py.txt"
+89. 
+90.     line_number(in_str, out_str)
+91. 
+92.     functions = parse_functions(in_str)
+93. 
+94.     print(f"Parsed {len(functions)} function(s):")
+95.     for func in functions:
+96.         print(func)
+97. 
+98. if __name__ == "__main__":
+99.     main()
