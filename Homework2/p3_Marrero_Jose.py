@@ -29,6 +29,9 @@ def add_user(sn: dict, username: str, fullname: str) -> bool:
 # Step B
 
 def add_friend(sn: dict, user1: str, user2: str) -> bool:
+    """akes a dictionary sn with a social network and
+adds a mutual friend link between users user1 and user2. The function returns True if success, and
+False otherwise, e.g. when at least one the user names given are not found in """
     try:
         if user1 not in sn or user2 not in sn:
             return False
