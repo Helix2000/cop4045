@@ -1,0 +1,183 @@
+# Problem 4
+# Name: Jose Marrero ZNUMBER: Z23816617
+
+# Part a)
+
+def ed_read(filename: str, start: int = 0, end: int = -1) -> str:
+    """
+    Args:
+        filename: name of text file 
+        start: Where reading begins being 0
+        end: Where reading ends being -1 
+        reading until the end of the file
+
+    Returns: A string that constains the requested part of the file
+
+    Raises:
+        IndexError: if the ending position exceeds the file length
+    """
+
+    with open(filename, "r") as file:
+        text = file.read()
+
+    length = len(text)
+
+    if end > length:
+        raise IndexError("End position exceeds file length")
+
+    if end == -1:
+        return text[start:]
+    else:
+        return text[start:end]
+
+# part b)
+
+
+def ed_find(filename: str, search_str: str) -> list[int]:
+    with open(filename, "r") as file:
+        text = file.read()
+
+    """
+    Function searches inside a text file for all occurrences of a given string
+
+    Args:
+        filename: File name of the file thats being searched
+        search_str: text to look for inside the file
+
+    Returns:
+        List that contains the starting index of each seperate match. Will return an empty list 
+        if it is unable to find any exact matches in the text file
+        
+    """
+
+
+    place = []
+    places = text.find(search_str)
+
+    while places != -1:
+        place.append(places)
+        places = text.find(search_str, places + 1)
+
+    return place
+# Jose Marrero ZNUMBER: Z23816617
+# part cc
+
+def ed_replace(filename: str, search_str: str, replace_with: str, occurrence: int = -1) -> int:
+    with open(filename, "r") as file:
+        text = file.read()
+    """
+    it replaces the text in the file with a string
+
+    Args:
+    filename: name of file to change
+    search_str: Tstring looking for
+    replace_with: string that replaces the original with
+    occurrence: the occurence that we want to replace
+    -1: replaces all of occurrences
+
+    Returns:
+    # of replacements made, else it returns 0 if the requested occurrence doesn't exist.
+    """
+
+    if search_str == "":
+        return 0
+
+    total = text.count(search_str)
+
+    if occurrence == -1:
+        changed_text = text.replace(search_str, replace_with)
+        replaced = total
+    else:
+        if occurrence < 0 or occurrence >= total:
+            return 0
+
+        position = -1
+        search_from = 0
+        for _ in range(occurrence + 1):
+            position = text.find(search_str, search_from)
+            search_from = position + len(search_str)
+        changed_text = (
+            text[:position] + replace_with + text[position + len(search_str):]
+        )
+        replaced = 1
+    with open(filename, "w") as file:
+        file.write(changed_text)
+    return replaced
+
+# part d)
+# Name: Jose Marrero ZNUMBER: Z23816617
+def ed_append(filename: str, string: str) -> int:
+    """
+    adds text at the end of the file chosen
+
+    Args:
+    filename: name of file
+    string: ttext to add to the file
+
+    Returns:
+    The number of characters added
+
+    Postconditions:
+    Creates file if it doesn't exist already, else
+    it keeps the existing text inside the file and adds the new text at the end of it
+    """
+    with open(filename, "a") as file:
+        file.write(string)
+
+    length = len(string)
+    return length
+
+def testif(condition: bool) -> None:
+    """
+    Prints whetever the test condition was succesful or not
+    """
+    if condition:
+        print("Test passed!")
+    else:
+        print("Test failed...")
+
+
+def test_ed_find() -> None:
+    """Test if the function ed_find returns the right indexes"""
+    with open("test.txt", "w") as file:
+        file.write("python javascript python c# c++ python")
+
+    result = ed_find("test.txt", "ytho")
+    expected = [1, 19, 33]
+
+    testif(result == expected)
+
+def test_ed_replace() -> None:
+    """
+    
+    """
+    with open("test.txt", "w") as file:
+        file.write("python java python")
+
+    result = ed_replace("test.txt", "python", "ruby")
+    expected = 2
+
+    testif(result == expected)
+
+
+"""
+displays all of the four text editors functions used for this problem
+"""
+def main() -> None:
+    filename = "append_test.txt"
+
+    with open(filename, "w") as file:
+        file.write("Python is fun")
+
+    ed_append(filename, " and useful!")
+    print(ed_read(filename))
+    print(ed_find(filename, "fun"))
+    print(ed_replace(filename, "fun", "awesome"))
+
+# Program running
+
+if __name__ == "__main__":
+    print("Starting program please wait...")
+    test_ed_find()
+    test_ed_replace()
+    main()

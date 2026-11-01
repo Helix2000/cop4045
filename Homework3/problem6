@@ -1,0 +1,95 @@
+from __future__ import annotations
+
+from typing import Optional
+
+#PART A
+class Entry:
+    """Base class for an item with a name and an optional parent entry."""
+
+    def __init__(self, name: str, parent: Optional[Entry] = None) -> None:
+        """Create an entry with its name and parent."""
+        self.name: str = name
+        self._parent: Optional[Entry] = parent
+
+    def parent(self) -> Optional[Entry]:
+        """Return this entry's parent, or None if it has no parent."""
+        return self._parent
+# Part C
+    def absolute_path(self) -> list[Entry]:
+        """Return this entry and its ancestors, ending with the root entry.
+
+        The list starts with this entry and follows parent references upward.
+        """
+        parent: Optional[Entry] = self.parent()
+        if parent is None:
+            return [self]
+        return [self] + parent.absolute_path()
+
+    def size(self) -> int:
+        """Return this entry's size in bytes."""
+        raise NotImplementedError("Subclasses must implement size().")
+
+
+class File(Entry):
+    """An entry that represents a file with a nonnegative byte size."""
+
+    def __init__(
+        self,
+        name: str,
+        bytes_used: int,
+        parent: Optional[Entry] = None,
+    ) -> None:
+        """Create a file, rejecting a negative byte count."""
+        if bytes_used < 0:
+            raise ValueError("bytes_used must be nonnegative.")
+
+        super().__init__(name, parent)
+        self.bytes_used: int = bytes_used
+
+    def size(self) -> int:
+        """Returns the size of the file in bytes."""
+        return self.bytes_used
+
+# Part B
+class Folder(Entry):
+    """An entry that contains child entries, including files and folders."""
+
+    def __init__(self, name: str, parent: Optional[Entry] = None) -> None:
+        """Create an empty folder with a name and an optional parent."""
+        super().__init__(name, parent)
+        self._children: list[Entry] = []
+
+    def add(self, entry: Entry) -> None:
+        """Add an entry as a child and set its parent to this folder."""
+        self._children.append(entry)
+        entry._parent = self
+
+    def children(self) -> tuple[Entry, ...]:
+        """Return the folder's children as a tuple."""
+        return tuple(self._children)
+
+    def size(self) -> int:
+        """Return the total size of all files contained in this folder.
+
+        Nested folders contribute their own recursive sizes.
+        """
+        return sum(entry.size() for entry in self._children)
+
+# Part D
+def find_large_files(entry: Entry, minimum_size: int) -> list[File]:
+    """Find files at least ``minimum_size`` bytes within an entry.
+
+    If ``entry`` is a file, it is returned when its size meets the threshold.
+    If it is a folder, its children are searched recursively, including files
+    in nested folders. The returned list follows the folder child order.
+    """
+    if isinstance(entry, File):
+        return [entry] if entry.size() >= minimum_size else []
+
+    if isinstance(entry, Folder):
+        large_files: list[File] = []
+        for child in entry.children():
+            large_files.extend(find_large_files(child, minimum_size))
+        return large_files
+
+    return []
